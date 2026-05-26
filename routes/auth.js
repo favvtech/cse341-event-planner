@@ -23,17 +23,23 @@ router.get('/github/callback', (req, res, next) => {
             return res.status(401).json({ error: 'GitHub OAuth login was not completed' });
         }
 
-        return req.logIn(user, (loginError) => {
-            if (loginError) {
-                return res.status(500).json({ error: 'Unable to start login session' });
+        return req.session.regenerate((regenerateError) => {
+            if (regenerateError) {
+                return res.status(500).json({ error: 'Unable to create login session' });
             }
 
-            return req.session.save((sessionError) => {
-                if (sessionError) {
-                    return res.status(500).json({ error: 'Unable to save login session' });
+            return req.logIn(user, (loginError) => {
+                if (loginError) {
+                    return res.status(500).json({ error: 'Unable to start login session' });
                 }
 
-                return res.redirect('/api-docs');
+                return req.session.save((sessionError) => {
+                    if (sessionError) {
+                        return res.status(500).json({ error: 'Unable to save login session' });
+                    }
+
+                    return res.redirect('/api-docs');
+                });
             });
         });
     })(req, res, next);

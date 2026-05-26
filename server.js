@@ -26,7 +26,6 @@ try {
 
 const app = express();
 const port = process.env.PORT || 3000;
-const isProduction = process.env.NODE_ENV === 'production';
 
 app.set('trust proxy', 1);
 app.use(cors({ origin: true, credentials: true }));
@@ -36,11 +35,12 @@ app.use(
         secret: process.env.SESSION_SECRET || 'development-session-secret',
         resave: false,
         saveUninitialized: false,
-        proxy: isProduction,
+        unset: 'destroy',
         cookie: {
             httpOnly: true,
             sameSite: 'lax',
-            secure: isProduction,
+            secure: false,
+            maxAge: 24 * 60 * 60 * 1000,
         },
     })
 );
