@@ -3,6 +3,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const session = require('express-session');
+const MongoStore = require('connect-mongo');
 const passport = require('passport');
 const GitHubStrategy = require('passport-github2').Strategy;
 const swaggerUi = require('swagger-ui-express');
@@ -26,6 +27,9 @@ try {
 
 const app = express();
 const port = process.env.PORT || 3000;
+const isProduction = process.env.NODE_ENV === 'production';
+const mongoUri = process.env.MONGODB_URI || process.env.MONGODB_URL;
+const dbName = process.env.DB_NAME || 'eventPlanner';
 
 app.set('trust proxy', 1);
 app.use(cors({ origin: true, credentials: true }));
@@ -35,11 +39,17 @@ app.use(
         secret: process.env.SESSION_SECRET || 'development-session-secret',
         resave: false,
         saveUninitialized: false,
-        unset: 'destroy',
+        proxy: isProduction,
+        store: MongoStore.create({
+            mongoUrl: mongoUri,
+            dbName,
+            collectionName: 'sessions',
+            ttl: 24 * 60 * 60,
+        }),
         cookie: {
             httpOnly: true,
             sameSite: 'lax',
-            secure: false,
+            secure: isProduction,
             maxAge: 24 * 60 * 60 * 1000,
         },
     })
