@@ -88,4 +88,33 @@ router.get('/status', (req, res) => {
     });
 });
 
+router.get('/debug-session', (req, res) => {
+    const cookieNames = (req.headers.cookie || '')
+        .split(';')
+        .map((cookie) => cookie.trim().split('=')[0])
+        .filter(Boolean);
+
+    return res.status(200).json({
+        authenticated: Boolean(req.isAuthenticated && req.isAuthenticated()),
+        sessionID: req.sessionID || null,
+        hasCookieHeader: Boolean(req.headers.cookie),
+        cookieNames,
+        sessionHasPassport: Boolean(req.session && req.session.passport),
+        passportUser: req.session && req.session.passport ? req.session.passport.user : null,
+        user: req.user
+            ? {
+                  githubId: req.user.githubId,
+                  username: req.user.username,
+                  displayName: req.user.displayName,
+              }
+            : null,
+        request: {
+            host: req.get('host'),
+            protocol: req.protocol,
+            secure: req.secure,
+            forwardedProto: req.get('x-forwarded-proto') || null,
+        },
+    });
+});
+
 module.exports = router;
