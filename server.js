@@ -36,6 +36,7 @@ app.use(
         secret: process.env.SESSION_SECRET || 'development-session-secret',
         resave: false,
         saveUninitialized: false,
+        proxy: isProduction,
         cookie: {
             httpOnly: true,
             sameSite: 'lax',

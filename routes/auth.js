@@ -28,7 +28,13 @@ router.get('/github/callback', (req, res, next) => {
                 return res.status(500).json({ error: 'Unable to start login session' });
             }
 
-            return res.redirect('/api-docs');
+            return req.session.save((sessionError) => {
+                if (sessionError) {
+                    return res.status(500).json({ error: 'Unable to save login session' });
+                }
+
+                return res.redirect('/api-docs');
+            });
         });
     })(req, res, next);
 });
@@ -39,7 +45,14 @@ router.get('/logout', (req, res) => {
             return res.status(500).json({ error: 'Unable to log out' });
         }
 
-        return res.status(200).json({ message: 'Logged out successfully' });
+        return req.session.destroy((sessionError) => {
+            if (sessionError) {
+                return res.status(500).json({ error: 'Unable to destroy session' });
+            }
+
+            res.clearCookie('connect.sid');
+            return res.status(200).json({ message: 'Logged out successfully' });
+        });
     });
 });
 
