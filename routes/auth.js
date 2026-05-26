@@ -2,6 +2,13 @@ const express = require('express');
 const passport = require('passport');
 
 const router = express.Router();
+const sessionCookieName = 'eventPlanner.sid';
+const isProduction = process.env.NODE_ENV === 'production';
+const sessionCookieOptions = {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: isProduction,
+};
 
 router.get('/github', (req, res, next) => {
     if (!process.env.GITHUB_CLIENT_ID || !process.env.GITHUB_CLIENT_SECRET) {
@@ -56,7 +63,7 @@ router.get('/logout', (req, res) => {
                 return res.status(500).json({ error: 'Unable to destroy session' });
             }
 
-            res.clearCookie('connect.sid');
+            res.clearCookie(sessionCookieName, sessionCookieOptions);
             return res.status(200).json({ message: 'Logged out successfully' });
         });
     });

@@ -30,12 +30,21 @@ const port = process.env.PORT || 3000;
 const isProduction = process.env.NODE_ENV === 'production';
 const mongoUri = process.env.MONGODB_URI || process.env.MONGODB_URL;
 const dbName = process.env.DB_NAME || 'eventPlanner';
+const sessionName = 'eventPlanner.sid';
+const sessionMaxAge = 7 * 24 * 60 * 60 * 1000;
+const sessionCookieOptions = {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: isProduction,
+    maxAge: sessionMaxAge,
+};
 
 app.set('trust proxy', 1);
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
 app.use(
     session({
+        name: sessionName,
         secret: process.env.SESSION_SECRET || 'development-session-secret',
         resave: false,
         saveUninitialized: false,
@@ -44,30 +53,25 @@ app.use(
             mongoUrl: mongoUri,
             dbName,
             collectionName: 'sessions',
-            ttl: 24 * 60 * 60,
+            ttl: sessionMaxAge / 1000,
         }),
-        cookie: {
-            httpOnly: true,
-            sameSite: 'lax',
-            secure: isProduction,
-            maxAge: 24 * 60 * 60 * 1000,
-        },
+        cookie: sessionCookieOptions,
     })
 );
 app.use(passport.initialize());
 app.use(passport.session());
 
 passport.serializeUser((user, done) => {
-    done(null, {
-        githubId: user.githubId,
-        username: user.username,
-        displayName: user.displayName,
-        profileUrl: user.profileUrl,
-    });
+    done(null, user.githubId);
 });
 
-passport.deserializeUser((user, done) => {
-    done(null, user);
+passport.deserializeUser(async (githubId, done) => {
+    try {
+        const user = await usersModel.findByGitHubId(githubId);
+        return done(null, user || false);
+    } catch (error) {
+        return done(error, null);
+    }
 });
 
 if (process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET) {

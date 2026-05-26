@@ -2,6 +2,8 @@ const mongodb = require('../data/database');
 
 const collection = () => mongodb.getDatabase().collection('users');
 
+const findByGitHubId = (githubId) => collection().findOne({ githubId });
+
 const upsertGitHubUser = async (profile) => {
     const now = new Date();
     const user = {
@@ -25,5 +27,6 @@ const upsertGitHubUser = async (profile) => {
 };
 
 module.exports = {
+    findByGitHubId,
     upsertGitHubUser,
 };
