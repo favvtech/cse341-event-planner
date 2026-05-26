@@ -79,10 +79,24 @@ if (process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET) {
     );
 }
 
+const getSwaggerHost = (req) => {
+    const host = process.env.API_HOST || req.get('host');
+    return host.replace(/^https?:\/\//, '').replace(/\/$/, '');
+};
+
+const getSwaggerScheme = (req) => {
+    const configuredScheme = process.env.API_SCHEME;
+    if (configuredScheme) {
+        return configuredScheme.replace('://', '');
+    }
+
+    return req.get('x-forwarded-proto') || req.protocol;
+};
+
 const getSwaggerDocument = (req) => ({
     ...swaggerDocument,
-    host: process.env.API_HOST || req.get('host'),
-    schemes: [process.env.API_SCHEME || req.get('x-forwarded-proto') || req.protocol],
+    host: getSwaggerHost(req),
+    schemes: [getSwaggerScheme(req)],
 });
 
 app.get('/api-docs.json', (req, res) => {
