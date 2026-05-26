@@ -1,0 +1,110 @@
+### Local variables
+@localHost = http://localhost:3000
+@eventId = replace-with-event-id
+@venueId = replace-with-venue-id
+
+### API welcome
+GET {{localHost}}/
+
+### Swagger JSON
+GET {{localHost}}/api-docs.json
+
+### Check OAuth status
+GET {{localHost}}/auth/status
+
+### Start GitHub OAuth login
+# Open this URL in your browser:
+# http://localhost:3000/auth/github
+
+### Get all venues
+GET {{localHost}}/venues
+
+### Get one venue
+GET {{localHost}}/venues/{{venueId}}
+
+### Create a venue
+# Requires GitHub OAuth login in the browser session.
+POST {{localHost}}/venues
+Content-Type: application/json
+
+{
+  "name": "Downtown Conference Hall",
+  "address": "120 Main Street",
+  "city": "Dallas",
+  "state": "TX",
+  "zipCode": "75201",
+  "capacity": 250,
+  "contactEmail": "booking@example.com"
+}
+
+### Update a venue
+# Requires GitHub OAuth login in the browser session.
+PUT {{localHost}}/venues/{{venueId}}
+Content-Type: application/json
+
+{
+  "name": "Downtown Conference Hall",
+  "address": "120 Main Street",
+  "city": "Dallas",
+  "state": "TX",
+  "zipCode": "75201",
+  "capacity": 300,
+  "contactEmail": "booking@example.com"
+}
+
+### Delete a venue
+# Requires GitHub OAuth login in the browser session.
+DELETE {{localHost}}/venues/{{venueId}}
+
+### Get all events
+GET {{localHost}}/events
+
+### Get one event
+GET {{localHost}}/events/{{eventId}}
+
+### Create an event
+# Requires GitHub OAuth login and an existing venueId.
+POST {{localHost}}/events
+Content-Type: application/json
+
+{
+  "name": "CSE341 Final Demo Night",
+  "description": "A showcase event for final API projects.",
+  "date": "2026-06-15",
+  "time": "18:00",
+  "venueId": "{{venueId}}",
+  "organizer": "Favour Igein",
+  "capacity": 120,
+  "budget": 1500,
+  "status": "planned"
+}
+
+### Update an event
+# Requires GitHub OAuth login and an existing venueId.
+PUT {{localHost}}/events/{{eventId}}
+Content-Type: application/json
+
+{
+  "name": "CSE341 Final Demo Night",
+  "description": "Updated showcase event for final API projects.",
+  "date": "2026-06-15",
+  "time": "19:00",
+  "venueId": "{{venueId}}",
+  "organizer": "Favour Igein",
+  "capacity": 150,
+  "budget": 1750,
+  "status": "scheduled"
+}
+
+### Delete an event
+# Requires GitHub OAuth login in the browser session.
+DELETE {{localHost}}/events/{{eventId}}
+
+### Render variables
+@renderHost = https://your-render-service-name.onrender.com
+
+### Render Swagger JSON
+GET {{renderHost}}/api-docs.json
+
+### Render get all events
+GET {{renderHost}}/events
